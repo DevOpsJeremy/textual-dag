@@ -2,6 +2,10 @@ from textual.app import App, ComposeResult
 from textual.widgets import Static, Header, Footer, Markdown
 from textual.containers import Vertical, Horizontal
 
+from rich.console import Console
+from rich.table import Table
+from rich.padding import Padding
+
 class DAGApp(App):
     """Textualize app for DAG visualization"""
 #
@@ -39,14 +43,25 @@ class DAGApp(App):
         """Create child widgets for the app."""
         yield Header()
 
-        with Horizontal():
-            with Vertical(id="dag_container"):
-                yield Markdown("hello") # print("Hello") # yield DAGRenderer(self.dag, self.initial_statuses)
+        table = Table(box=None, padding=0)
 
-            with Vertical(id="status_container"):
-                print("Goodbye") # yield DAGStatusTable(self.initial_statuses)
+        table.add_column("")
+        table.add_column("")
+        table.add_column("")
+        table.add_column("")
+        table.add_column("")
+        table.add_column("")
+
+        node_a_name = "node_cdefg"
+        node_b_name = "node_b"
+
+        table.add_row("", "", " ╭─●", Padding(f"{node_b_name} ".ljust(len(node_a_name) + 1, "─"), (0,0,0,1)), Padding("─╮", 0), "")
+        table.add_row("●", Padding("node_a", (0,1,0,1)), "─┤", "", " ├─●", Padding("node_d", (0,1,0,1)))
+        table.add_row("", "", " ╰─●", Padding(node_a_name, (0,1,0,1)), "─╯", "")
+        yield Static(table)
 
         yield Footer()
+
 #
 #    def action_refresh(self) -> None:
 #        """Refresh the display."""

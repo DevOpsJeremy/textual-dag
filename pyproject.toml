@@ -14,7 +14,7 @@ classifiers = [
 ]
 
 readme = "README.md"
-license = "GPLv3"
+license = "GPL-3.0-only"
 license-files = ["LICEN[CS]E*"] # spellchecker: ignore LICEN
 authors = [
   {name = "Jeremy Watkins", email = "DevOpsJeremy@gmail.com"}
