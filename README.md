@@ -1,2 +1,4 @@
-# textual-dag
-Directed acyclic graph for Textual
+# Textual: DAG
+
+Directed acyclic graph (DAG) widget for Textual.
+
