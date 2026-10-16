@@ -5,6 +5,7 @@ from textual.containers import Vertical, Horizontal
 from rich.console import Console
 from rich.table import Table
 from rich.padding import Padding
+from rich.text import Text
 
 class DAGApp(App):
     """Textualize app for DAG visualization"""
@@ -55,9 +56,11 @@ class DAGApp(App):
         node_a_name = "node_cdefg"
         node_b_name = "node_b"
 
+
         table.add_row("", "", " ╭─●", Padding(f"{node_b_name} ".ljust(len(node_a_name) + 1, "─"), (0,0,0,1)), Padding("─╮", 0), "")
-        table.add_row("●", Padding("node_a", (0,1,0,1)), "─┤", "", " ├─●", Padding("node_d", (0,1,0,1)))
+        table.add_row(Text("●", style=f"bold green"), Padding("node_a", (0,1,0,1)), "─┤", "", " ├─●", Padding("node_d", (0,1,0,1)))
         table.add_row("", "", " ╰─●", Padding(node_a_name, (0,1,0,1)), "─╯", "")
+
         yield Static(table)
 
         yield Footer()
