@@ -1,3 +1,5 @@
+from enum import Enum
+
 from textual.app import App, ComposeResult
 from textual.widgets import Static, Header, Footer, Markdown
 from textual.containers import Vertical, Horizontal
@@ -35,39 +37,71 @@ STATUS_SYMBOLS = {
 
 class DAGApp(App):
     """Textualize app for DAG visualization"""
-#
-#    CSS = """
-#    Screen {
-#        layout: vertical;
-#    }
-#
-#    #dag_container {
-#        height: 60%;
-#        width: 100%;
-#    }
-#
-#    #status_container {
-#        height: 40%;
-#        width: 100%;
-#    }
-#
-#    DAGRenderer {
-#        overflow: auto;
-#    }
-#
-#    DAGStatusTable {
-#        overflow: auto;
-#    }
-#    """
-#
-#    BINDINGS = [
-#        ("q", "quit", "Quit"),
-#        ("r", "refresh", "Refresh"),
-#    ]
-#
-#
+
+
     def generate_table(self, dag: nx.DiGraph):
-        pass
+        # topological layers (generations)
+        gens = list(nx.topological_generations(dag))
+        layers = [sorted(list(g)) for g in gens]
+        if not layers:
+            return Table(box=None)
+
+        # columns: layer columns separated by connector columns
+        n_layers = len(layers)
+        n_cols = n_layers * 2 - 1
+        table = Table(box=None, padding=0)
+        for _ in range(n_cols):
+            table.add_column("")
+        max_rows = max(len(layer) for layer in layers)
+
+        # grid of cells
+        grid = [["" for _ in range(n_cols)] for _ in range(max_rows)]
+        positions = {}
+        # place nodes in even columns (0,2,4,...)
+        for li, layer in enumerate(layers):
+            col = li * 2
+            for ri, node in enumerate(layer):
+                positions[node] = (col, ri)
+                status = dag.nodes[node].get("status", NodeStatus.PENDING)
+                color = STATUS_COLORS.get(status, "white")
+                symbol = STATUS_SYMBOLS.get(status, "○")
+                # color the symbol; keep name at right
+                grid[ri][col] = Padding(f"[{color}]{symbol}[/]{' '}{node}", (0,1,0,1))
+
+        # draw simple connectors for edges that go to a later layer
+        for u, v in dag.edges():
+            if u not in positions or v not in positions:
+                continue
+            cu, ru = positions[u]
+            cv, rv = positions[v]
+            # draw horizontal across connector columns between cu and cv on row ru
+            step = 1 if cu < cv else -1
+            for c in range(cu + step, cv, step):
+                # only draw on connector columns (odd indexes)
+                if grid[ru][c] == "":
+                    grid[ru][c] = "─"
+            # mark a junction at the cell immediately left of the target node
+            junction_col = cv - 1 if cu < cv else cv + 1
+            if ru == rv:
+                grid[ru][junction_col] = "─┤" if cu < cv else "├─"
+            else:
+                # simple vertical routing down/up from source row to target row in that junction column
+                rstart, rend = (ru, rv) if ru < rv else (rv, ru)
+                for r in range(rstart, rend + 1):
+                    if grid[r][junction_col] == "":
+                        grid[r][junction_col] = "│"
+                # decorate endpoints
+                grid[ru][junction_col] = "┌" if ru < rv else "└"
+                grid[rv][junction_col] = "┴"
+
+        # add rows to table
+        for r in range(max_rows):
+            row_cells = []
+            for c in range(n_cols):
+                cell = grid[r][c]
+                row_cells.append(cell if cell != "" else "")
+            table.add_row(*row_cells)
+        return table
 
     def new_digraph(self):
         """Populate nodes and edges from the configured ``Plan``.
@@ -75,7 +109,7 @@ class DAGApp(App):
         Validates that every declared dependency exists and that the graph has
         no cycles; raises on error.
         """
-        dg = nx.DiGraph
+        dg = nx.DiGraph()
         dg.add_node('node_a', status=NodeStatus.SUCCESS)
         dg.add_node('node_bcdefg', status=NodeStatus.FAILED)
         dg.add_node('node_c', status=NodeStatus.RUNNING)
@@ -85,8 +119,17 @@ class DAGApp(App):
         dg.add_edge('node_a', 'node_c')
         dg.add_edge('node_bcdefg', 'node_d')
         dg.add_edge('node_c', 'node_d')
+        dg.add_edge('node_a', 'node_d')
+        return dg
 
     def compose(self) -> ComposeResult:
+        yield Header()
+        dg = self.new_digraph()
+        table = self.generate_table(dg)
+        yield Static(table)
+        yield Footer()
+
+    def old_compose(self) -> ComposeResult:
         """Create child widgets for the app."""
         yield Header()
 
@@ -120,9 +163,3 @@ class DAGApp(App):
 
         yield Footer()
 
-#
-#    def action_refresh(self) -> None:
-#        """Refresh the display."""
-#        self.refresh()
-#
-#
