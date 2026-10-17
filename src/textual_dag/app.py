@@ -70,30 +70,32 @@ class DAGApp(App):
 
         # draw simple connectors for edges that go to a later layer
         for u, v in dag.edges():
-            if u not in positions or v not in positions:
-                continue
-            cu, ru = positions[u]
-            cv, rv = positions[v]
-            # draw horizontal across connector columns between cu and cv on row ru
-            step = 1 if cu < cv else -1
-            for c in range(cu + step, cv, step):
-                # only draw on connector columns (odd indexes)
-                if grid[ru][c] == "":
-                    grid[ru][c] = "─"
-            # mark a junction at the cell immediately left of the target node
-            junction_col = cv - 1 if cu < cv else cv + 1
-            if ru == rv:
-                grid[ru][junction_col] = "─┤" if cu < cv else "├─"
-            else:
-                # simple vertical routing down/up from source row to target row in that junction column
-                rstart, rend = (ru, rv) if ru < rv else (rv, ru)
-                for r in range(rstart, rend + 1):
-                    if grid[r][junction_col] == "":
-                        grid[r][junction_col] = "│"
-                # decorate endpoints
-                grid[ru][junction_col] = "┌" if ru < rv else "└"
-                grid[rv][junction_col] = "┴"
-
+            pass
+#        for u, v in dag.edges():
+#            if u not in positions or v not in positions:
+#                continue
+#            cu, ru = positions[u]
+#            cv, rv = positions[v]
+#            # draw horizontal across connector columns between cu and cv on row ru
+#            step = 1 if cu < cv else -1
+#            for c in range(cu + step, cv, step):
+#                # only draw on connector columns (odd indexes)
+#                if grid[ru][c] == "":
+#                    grid[ru][c] = "─"
+#            # mark a junction at the cell immediately left of the target node
+#            junction_col = cv - 1 if cu < cv else cv + 1
+#            if ru == rv:
+#                grid[ru][junction_col] = "─┤" if cu < cv else "├─"
+#            else:
+#                # simple vertical routing down/up from source row to target row in that junction column
+#                rstart, rend = (ru, rv) if ru < rv else (rv, ru)
+#                for r in range(rstart, rend + 1):
+#                    if grid[r][junction_col] == "":
+#                        grid[r][junction_col] = "│"
+#                # decorate endpoints
+#                grid[ru][junction_col] = "┌" if ru < rv else "└"
+#                grid[rv][junction_col] = "┴"
+#
         # add rows to table
         for r in range(max_rows):
             row_cells = []
@@ -119,7 +121,7 @@ class DAGApp(App):
         dg.add_edge('node_a', 'node_c')
         dg.add_edge('node_bcdefg', 'node_d')
         dg.add_edge('node_c', 'node_d')
-        dg.add_edge('node_a', 'node_d')
+        # dg.add_edge('node_a', 'node_d')
         return dg
 
     def compose(self) -> ComposeResult:
