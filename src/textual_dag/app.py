@@ -68,9 +68,13 @@ class DAGApp(App):
                 # color the symbol; keep name at right
                 grid[ri][col] = Padding(f"[{color}]{symbol}[/]{' '}{node}", (0,1,0,1))
 
+        for generation in gens:
+            all_predecessors = []
+            for node in generation:
+                all_predecessors.extend(list(dag.predecessors(node)))
+            all_predecessors = list(set(all_predecessors))
+
         # draw simple connectors for edges that go to a later layer
-        for u, v in dag.edges():
-            pass
 #        for u, v in dag.edges():
 #            if u not in positions or v not in positions:
 #                continue
@@ -113,15 +117,35 @@ class DAGApp(App):
         """
         dg = nx.DiGraph()
         dg.add_node('node_a', status=NodeStatus.SUCCESS)
-        dg.add_node('node_bcdefg', status=NodeStatus.FAILED)
+        dg.add_node('node_b', status=NodeStatus.FAILED)
         dg.add_node('node_c', status=NodeStatus.RUNNING)
         dg.add_node('node_d', status=NodeStatus.PENDING)
+        dg.add_node('node_e', status=NodeStatus.PENDING)
+        dg.add_node('node_f', status=NodeStatus.PENDING)
+        dg.add_node('node_g', status=NodeStatus.PENDING)
+        dg.add_node('node_h', status=NodeStatus.PENDING)
+        dg.add_node('node_i', status=NodeStatus.PENDING)
+        dg.add_node('node_j', status=NodeStatus.PENDING)
+        dg.add_node('node_k', status=NodeStatus.PENDING)
+        dg.add_node('node_l', status=NodeStatus.PENDING)
 
-        dg.add_edge('node_a', 'node_bcdefg')
+        dg.add_edge('node_a', 'node_b')
         dg.add_edge('node_a', 'node_c')
-        dg.add_edge('node_bcdefg', 'node_d')
+        dg.add_edge('node_a', 'node_h')
+        dg.add_edge('node_a', 'node_f')
+        dg.add_edge('node_a', 'node_i')
+        dg.add_edge('node_i', 'node_l')
+        dg.add_edge('node_b', 'node_e')
+        dg.add_edge('node_b', 'node_d')
+        dg.add_edge('node_c', 'node_e')
         dg.add_edge('node_c', 'node_d')
-        # dg.add_edge('node_a', 'node_d')
+        dg.add_edge('node_h', 'node_e')
+        dg.add_edge('node_h', 'node_d')
+        dg.add_edge('node_e', 'node_g')
+        dg.add_edge('node_e', 'node_m')
+        dg.add_edge('node_f', 'node_g')
+        dg.add_edge('node_f', 'node_m')
+        dg.add_edge('node_j', 'node_k')
         return dg
 
     def compose(self) -> ComposeResult:
